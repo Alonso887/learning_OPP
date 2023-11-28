@@ -10,10 +10,10 @@ class Player:
 
     instances = []
 
-    def __init__(self, name:str, cards= [], state= False,total_value= 0):
+    def __init__(self, name:str, state= False ,total_value= 0):
         #Values asignation:
         self.name = name
-        self.cards = cards
+        self.cards = []
         self.state = state
         self.total_value = total_value
         #Extra steps
@@ -92,18 +92,24 @@ def main():
     while True:
         game_turn()
         players_states = []
+        str_win = False
         for player in Player.instances:
             if isinstance(player.state,str):
                 c()
+                str_win = True
                 print(f"{player.name} is the winner!")
                 s(5)
                 c()
                 break
             #This part adds the state of playesrs into a list, if there is 0 False states
-            #that means there are only standing players so the one closer to 21 wins
-            players_states.append(player.state)
-            if players_states.count(False) < 0:
+            try:#that means there are only standing players so the one closer to 21 wins
+             players_states.append(player.state)
+            except:
+                break
+            if players_states.count(False) < 1:
                 players_states = True #This has to be boolean pls, so this works
+        if str_win:
+            break
         if isinstance(players_states,list):
             continue
         elif isinstance(players_states,bool):
@@ -113,11 +119,11 @@ def main():
                  player_values[0].append(player.name)
                  player_values[1].append(player.total_value)
             c()
-            print(f"{player_values[0].index(max(player_values[1]))} is the winner!")
+            #player_values[0].index(player_values[1].index(max(player_values[1])))
+            print(f"{player_values[0][player_values[1].index(max(player_values[1]))]} is the winner!")
             s(5)
             c()
             break
-        break
 
 #Allows to create infinite amount of players, but usually it will be less than 1
 def create_new_players():
