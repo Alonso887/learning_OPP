@@ -1,5 +1,9 @@
 import random, os, time
 
+#Made by LaEntropia
+#edit: Sorry for the spaghetti code
+
+
 def c():
     os.system('cls')
 
@@ -128,6 +132,7 @@ def main():
 #Allows to create infinite amount of players, but usually it will be less than 1
 def create_new_players():
     while True:
+        print("BLACKJACK\nby LaEntropia\n \n")
         print("Select an option:\n1- Create player\n2- Start game")
         choice = int(input("> "))
         if choice < 2:
