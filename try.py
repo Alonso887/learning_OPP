@@ -1,118 +1,27 @@
-value = 10
-symbol = "♥"
-figure = "K"
+import tkinter as tk 
 
-carta = [f"""
-┌─────────┐
-│{value}        │
-│    {symbol}    │
-│         │
-│    {symbol}    │   
-│        {value}│
-└─────────┘
-""",
-f""""
-┌─────────┐
-│{value}   {symbol}    │
-│         │
-│    {symbol}    │
-│         │   
-│    {symbol}   {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}        │
-│  {symbol}   {symbol}  │
-│         │
-│  {symbol}   {symbol}  │   
-│        {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}        │
-│  {symbol}   {symbol}  │
-│    {symbol}    │
-│  {symbol}   {symbol}  │   
-│        {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}   {symbol}    │
-│  {symbol}   {symbol}  │
-│    {symbol}    │
-│  {symbol}   {symbol}  │   
-│        {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}   {symbol}    │
-│  {symbol}   {symbol}  │
-│    {symbol}    │
-│  {symbol}   {symbol}  │   
-│    {symbol}   {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}   {symbol}    │
-│  {symbol}   {symbol}  │
-│{symbol}   {symbol}    │
-│  {symbol}   {symbol}  │   
-│    {symbol}   {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value}   {symbol}    │
-│  {symbol}   {symbol}  │
-│{symbol}   {symbol}   {symbol}│
-│  {symbol}   {symbol}  │   
-│    {symbol}   {value}│
-└─────────┘
-""",
-f"""
-┌─────────┐
-│{value} {symbol} {symbol}   │
-│  {symbol}   {symbol}  │
-│ {symbol}     {symbol} │
-│  {symbol}   {symbol}  │   
-│   {symbol} {symbol} {value}│
-└─────────┘
-"""
-]
+root = tk.Tk()
+root.geometry("720x540")
+root.resizable(False,False)
 
-['\n┌─────────┐\n│10        │\n│    ♥    │\n│         │\n│    ♥    │   \n│        10│\n└─────────┘\n', 
-'"\n┌─────────┐\n│10   ♥    │\n│         │\n│    ♥    │\n│         │   \n│    ♥   10│\n└─────────┘\n',
-'\n┌─────────┐\n│10        │\n│  ♥   ♥  │\n│         │\n│  ♥   ♥  │   \n│        10│\n└─────────┘\n',
-'\n┌─────────┐\n│10        │\n│  ♥   ♥  │\n│    ♥    │\n│  ♥   ♥  │   \n│        10│\n└─────────┘\n',
-'\n┌─────────┐\n│10   ♥    │\n│  ♥   ♥  │\n│    ♥    │\n│  ♥   ♥  │   \n│        10│\n└─────────┘\n',
-'\n┌─────────┐\n│10   ♥    │\n│  ♥   ♥  │\n│    ♥    │\n│  ♥   ♥  │   \n│    ♥   10│\n└─────────┘\n',
-'\n┌─────────┐\n│10   ♥    │\n│  ♥   ♥  │\n│♥   ♥    │\n│  ♥   ♥  │   \n│    ♥   10│\n└─────────┘\n',
-'\n┌─────────┐\n│10   ♥    │\n│  ♥   ♥  │\n│♥   ♥   ♥│\n│  ♥   ♥  │   \n│    ♥   10│\n└─────────┘\n',
-'\n┌─────────┐\n│10 ♥ ♥   │\n│  ♥   ♥  │\n│ ♥     ♥ │\n│  ♥   ♥  │   \n│   ♥ ♥ 10│\n└─────────┘\n']
+canvas = tk.Canvas(root, height= 540, width= 540, background= "black", highlightbackground="black")
+canvas.place(x= 360, y= 270, anchor= tk.CENTER)
+for i in range(0,8):
+    canvas.columnconfigure(i, minsize= 54)
+    canvas.rowconfigure(i, minsize= 54)
 
-a = [r'\n┌─────────┐\n│{value}        │\n│    {symbol}    │\n│         │\n│    {symbol}    │   \n│        {value}│\n└─────────┘\n',
-r'\n┌─────────┐\n│{value}   {symbol}    │\n│         │\n│    {symbol}    │\n│         │   \n│    {symbol}   {value}│\n└─────────┘\n',
-r'\n┌─────────┐\n│{value}        │\n│  {symbol}   {symbol}  │\n│         │\n│  {symbol}   {symbol}  │   \n│        {value}│\n└─────────┘\n',
-r'\n┌─────────┐\n│{value}        │\n│  {symbol}   {symbol}  │\n│    {symbol}    │\n│  {symbol}   {symbol}  │   \n│        {value}│\n└─────────┘\n',
-r'\n┌─────────┐\n│{value}   {symbol}    │\n│  {symbol}   {symbol}  │\n│    {symbol}    │\n│  {symbol}   {symbol}  │   \n│        {value}│\n└─────────┘\n',
-r'\n┌─────────┐\n│{value}   {symbol}    │\n│  {symbol}   {symbol}  │\n│    {symbol}    │\n│  {symbol}   {symbol}  │   \n│    {symbol}   {value}│\n└─────────┘\n', 
-r'\n┌─────────┐\n│{value}   {symbol}    │\n│  {symbol}   {symbol}  │\n│{symbol}   {symbol}    │\n│  {symbol}   {symbol}  │   \n│    {symbol}   {value}│\n└─────────┘\n', 
-r'\n┌─────────┐\n│{value}   {symbol}    │\n│  {symbol}   {symbol}  │\n│{symbol}   {symbol}   {symbol}│\n│  {symbol}   {symbol}  │   \n│    {symbol}   {value}│\n└─────────┘\n', 
-r'\n┌─────────┐\n│{value} {symbol} {symbol}   │\n│  {symbol}   {symbol}  │\n│ {symbol}     {symbol} │\n│  {symbol}   {symbol}  │   \n│   {symbol} {symbol} {value}│\n└─────────┘\n']
+foto = tk.PhotoImage(file=r'C:\Users\aadri\Desktop\Coding\Repositories\learning_OOP\assets\white_pawn.png')
 
-finura =[r"""
-┌─────────┐
-│{figure}       {symbol}│
-│    {symbol}    │
-│    {figure}    │
-│    {symbol}    │
-│{symbol}       {figure}│
-└─────────┘         
-"""
-]
-print(finura)
+for i in range(0,8):
+    for k in range(0,8):
+        Label1 = tk.Label(canvas, background= "white", image= foto)
+        Label1.grid(column= i, row= k)
+
+
+
+root.mainloop()
+#1-Parrafo de presentacion-Alonso
+#2-Sintomas-Alonso
+#3-Factores de riesgo-Johan
+#4-Estadisticas-Johan
+#5-Tratamientos-Felix
