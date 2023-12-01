@@ -4,7 +4,7 @@ root = tk.Tk()
 root.geometry("720x540")
 root.resizable(False,False)
 
-canvas = tk.Canvas(root, height= 540, width= 540, background= "black", highlightbackground="black")
+canvas = tk.Canvas(root, height= 480, width= 480, background= "black", highlightbackground="black")
 canvas.place(x= 360, y= 270, anchor= tk.CENTER)
 for i in range(0,8):
     canvas.columnconfigure(i, minsize= 54)
