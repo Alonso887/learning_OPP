@@ -14,15 +14,15 @@ class Board():
         for i in range(0,8):
             self.canvas.columnconfigure(i, minsize= 54)
             self.canvas.rowconfigure(i, minsize= 54)
-
         #This sets a blank image to all the cellsin the board
         for i in range(0,8):
             for k in range(0,8):
                 empty_cell = Empty(self)
-                empty_cell.position_piece(i, k)
+                empty_cell.position_piece(i, k) 
 
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
+    instances = []
     def __init__(self, container):
         self.container = container.canvas
         self.image_file = r'assets\empty.png'
@@ -35,6 +35,19 @@ class Empty():
         #can be used later when 
         self.row = row
         self.column = column
+        self.Label.bind('<Button-1>', self.select_piece)
+
+        Empty.instances.append(self)
+    
+    #More info in the other classes
+    def select_piece(self,event):
+        pass
+
+    #Clears all the cells in ALL of the boards    
+    @staticmethod
+    def clear_boards_background():
+        for cell in Empty.instances:
+            cell.Label.configure(background= 'white')
 
 class Tower(Empty):
     colors = {'black':r'assets\black_tower.png','white':r'assets\white_tower.png'}
@@ -45,6 +58,11 @@ class Tower(Empty):
         self.image_file = Tower.colors[color]  
         #Extra methods
         Tower.instances.append(self)
+
+    #Turns the background red and marks the posible moves for the piece
+    def select_piece(self,event):
+        self.clear_boards_background()
+        self.Label.configure(background= 'red')
 
 class Pawn(Empty):
     colors = {'black':r'assets\black_pawn.png','white':r'assets\white_pawn.png'}
@@ -63,7 +81,7 @@ def main():
     root.resizable(False,False)
     board = Board(root)
     for i in range(0,8):
-        black_pawn = Pawn(board, 'black')
+        black_pawn = Tower(board, 'black')
         black_pawn.position_piece(row= 1, column= i)
         white_pawn = Pawn(board, 'white')
         white_pawn.position_piece(row= 6, column= i)
