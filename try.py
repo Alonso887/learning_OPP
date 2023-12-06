@@ -1,32 +1,33 @@
-import tkinter as tk
+class Empty():
+      def __init__(self) -> None:
+            pass
 
-def configurar_label(row, column):
-    # Obtener la referencia a la Label en la posición dada
-    label = labels[(row, column)]
+class Tower(Empty):
+      def __init__(self) -> None:
+            super().__init__()
 
-    # Configurar propiedades de la Label
-    label.config(text=f"Label en ({row}, {column})", bg="lightblue", padx=10, pady=10)
+position = (3,4)
+position_lists = [[],[],[],[],[],[],[],[]]
 
-# Crear la ventana principal
-root = tk.Tk()
-root.title("Configuración de Labels en un Canvas")
+for i, k in [(i,k) for i in range(8) for k in range(8)]:
+            empty_cell = Empty()
+            position_lists[i].append(empty_cell)
 
-# Crear un Canvas
-canvas = tk.Canvas(root, width=400, height=300)
-canvas.pack()
+position_lists[3][6] = Tower()
+directions = {'right':[(x,position[1]) for x in range(position[0]+1,8)],
+              'left':[(x,position[1]) for x in range(position[0]-1,-1,-1)],
+              'up':[(position[0],y) for y in range(position[1]+1,8)],
+              'down':[(position[0],y) for y in range(position[1]-1,-1,-1)]}
 
-# Crear Labels y colocarlos en el Canvas usando grid
-labels = {}
-for i in range(3):
-    for j in range(3):
-        label = tk.Label(canvas, text=f"Label en ({i}, {j})", borderwidth=2, relief="solid")
-        label.grid(row=i, column=j, padx=5, pady=5)
-        labels[(i, j)] = label
+def cola(direction: str):
+    for x, y in directions[direction]:
+        cell_to_check = position_lists[x][y]
+        if type(cell_to_check) is Empty:
+            print(f"{direction} {x} and {y}")
+        else:
+            break
 
-# Configurar la Label en la posición (1, 1)
-configurar_label(1, 1)
-
-# Puedes llamar a la función configurar_label para otras posiciones según sea necesario
-
-# Iniciar el bucle principal de la aplicación
-root.mainloop()
+cola('right')
+cola('left')
+cola('up')
+cola('down')

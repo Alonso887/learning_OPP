@@ -9,37 +9,35 @@ class Board():
         self.container = container
         self.canvas = tk.Canvas(self.container,height= 480, width= 480, background= "black", highlightbackground="black")
         self.canvas.place(x= 360, y= 270, anchor= tk.CENTER)
+        self.position_lists = [[],[],[],[],[],[],[],[]]
         
         #Extramethods
         for i in range(0,8):
             self.canvas.columnconfigure(i, minsize= 54)
             self.canvas.rowconfigure(i, minsize= 54)
-        #This sets a blank image to all the cellsin the board
-        for i in range(0,8):
-            for k in range(0,8):
-                empty_cell = Empty(self)
-                empty_cell.position_piece(i, k) 
+        
+        for i, k in [(i,k) for i in range(8) for k in range(8)]:
+            empty_cell = Empty(self)
+            empty_cell.position_piece(i, k)
+            self.position_lists[i].append(empty_cell)            
 
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
     instances = []
-    def __init__(self, container):
+    def __init__(self, container:Board):
+        self.board = container
         self.container = container.canvas
-        self.image_file = r'assets\empty.png'
+        self.piece_image = tk.PhotoImage(file= r'assets\empty.png')
 
     def position_piece(self, row:int, column:int):
-        self.piece_image = tk.PhotoImage(file= self.image_file)
-        self.Label = tk.Label(self.container, image= self.piece_image, background= "white", text="a")
-        self.Label.grid(row= row, column= column)
-        #Sets the postion given as an atribute of the instance so its position in the board
-        #can be used later when 
-        self.row = row
-        self.column = column
+        self.Label = tk.Label(self.container, image= self.piece_image, background= "white", width= 48, height= 48)
         self.Label.bind('<Button-1>', self.select_piece)
-
-        Empty.instances.append(self)
+        self.Label.grid(row= row, column= column)
+        
+        self.position = (row,column)
+        if not type(self) is Empty:
+            self.board.position_lists[row][column] = self
     
-    #More info in the other classes
     def select_piece(self,event):
         pass
 
@@ -55,7 +53,7 @@ class Tower(Empty):
     def __init__(self, container, color:str):
         super().__init__(container= container)
         #Value asignation
-        self.image_file = Tower.colors[color]  
+        self.piece_image = tk.PhotoImage(file= Tower.colors[color])  
         #Extra methods
         Tower.instances.append(self)
 
@@ -63,6 +61,26 @@ class Tower(Empty):
     def select_piece(self,event):
         self.clear_boards_background()
         self.Label.configure(background= 'red')
+        self.check_movements('right')
+        self.check_movements('left')
+        self.check_movements('up')
+        self.check_movements('down')
+    
+    def check_movements(self, direction:str):
+        #YES, i just learned how to use coprehensions, what, You having problems comprehending?
+        list_of_pieces = [Tower, Pawn]
+        directions = {'up':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
+                      'down':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
+                      'right':[(self.position[0],column) for column in range(self.position[1]+1,8)],
+                      'left':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
+        for row, column in directions[direction]:
+            cell_to_check = self.board.position_lists[row][column]
+            cell_to_check.Label.configure(background= 'yellow')
+            if type(cell_to_check).__name__ == 'Empty':
+                print(type(cell_to_check).__name__)
+            else:
+                break
+    
 
 class Pawn(Empty):
     colors = {'black':r'assets\black_pawn.png','white':r'assets\white_pawn.png'}
@@ -70,10 +88,13 @@ class Pawn(Empty):
     def __init__(self, container, color:str):
         super().__init__(container)
         #Value asignation
-        self.image_file = Pawn.colors[color]
+        self.piece_image = tk.PhotoImage(file= Pawn.colors[color])
         #Extra methods
         Pawn.instances.append(self)
 
+    def select_piece(self,event):
+        self.clear_boards_background()
+        self.Label.configure(background= 'red')
 
 def main():
     root = tk.Tk()
@@ -85,6 +106,12 @@ def main():
         black_pawn.position_piece(row= 1, column= i)
         white_pawn = Pawn(board, 'white')
         white_pawn.position_piece(row= 6, column= i)
+
+    a = Tower(board,'white')
+    b = Tower(board,'white')
+
+    a.position_piece(3,6)
+    b.position_piece(3,4)
     
     root.mainloop()
 
