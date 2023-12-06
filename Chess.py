@@ -19,7 +19,12 @@ class Board():
         for i, k in [(i,k) for i in range(8) for k in range(8)]:
             empty_cell = Empty(self)
             empty_cell.position_piece(i, k)
-            self.position_lists[i].append(empty_cell)            
+            self.position_lists[i].append(empty_cell)  
+
+    def clear_board(self):
+        for i, k in [(i,k) for i in range(8) for k in range(8)]:
+            cell_to_clear = self.position_lists[i][k]
+            cell_to_clear.Label.configure(background= 'white')         
 
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
@@ -59,7 +64,7 @@ class Tower(Empty):
 
     #Turns the background red and marks the posible moves for the piece
     def select_piece(self,event):
-        self.clear_boards_background()
+        self.board.clear_board()
         self.Label.configure(background= 'red')
         self.check_movements('right')
         self.check_movements('left')
@@ -68,7 +73,6 @@ class Tower(Empty):
     
     def check_movements(self, direction:str):
         #YES, i just learned how to use coprehensions, what, You having problems comprehending?
-        list_of_pieces = [Tower, Pawn]
         directions = {'up':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
                       'down':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
                       'right':[(self.position[0],column) for column in range(self.position[1]+1,8)],
@@ -76,9 +80,7 @@ class Tower(Empty):
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
             cell_to_check.Label.configure(background= 'yellow')
-            if type(cell_to_check).__name__ == 'Empty':
-                print(type(cell_to_check).__name__)
-            else:
+            if not type(cell_to_check).__name__ == 'Empty':
                 break
     
 
