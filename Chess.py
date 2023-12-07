@@ -11,7 +11,7 @@ class Board():
         self.canvas.place(x= 360, y= 270, anchor= tk.CENTER)
         self.position_lists = [[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],
                                [0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7]]
-        self.color_turn = "white"
+        self.color_turn = "black"
 
         #Extramethods
         for i in range(0,8):
@@ -72,6 +72,7 @@ class Tower(Empty):
     def __init__(self, container: Board, color:str):
         super().__init__(container= container)
         #Value asignation
+        self.color = color
         self.piece_image = tk.PhotoImage(file= Tower.colors[color])  
         #Extra methods
         Tower.instances.append(self)
@@ -93,6 +94,8 @@ class Tower(Empty):
                       'left':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
+            if cell_to_check.color == self.color:
+                break 
             cell_to_check.Label.configure(background= 'yellow')
             if not type(cell_to_check).__name__ == 'Empty': 
                 break
@@ -104,6 +107,7 @@ class Pawn(Empty):
     def __init__(self, container, color:str):
         super().__init__(container)
         #Value asignation
+        self.color = color
         self.piece_image = tk.PhotoImage(file= Pawn.colors[color])
         #Extra methods
         Pawn.instances.append(self)
