@@ -1,33 +1,32 @@
-class Empty():
-      def __init__(self) -> None:
-            pass
+import tkinter as tk
 
-class Tower(Empty):
-      def __init__(self) -> None:
-            super().__init__()
+def on_button_click(event):
+    print("Botón clicado")
 
-position = (3,4)
-position_lists = [[],[],[],[],[],[],[],[]]
+def desvincular_evento():
+    # Verificar si el evento está vinculado antes de desvincularlo
+    if ("<Button-1>", on_button_click) in boton.bind():
+        boton.unbind("<Button-1>", on_button_click)
+        print("Evento desvinculado")
+    else:
+        print("Evento no vinculado")
 
-for i, k in [(i,k) for i in range(8) for k in range(8)]:
-            empty_cell = Empty()
-            position_lists[i].append(empty_cell)
+# Crear la ventana principal
+ventana = tk.Tk()
 
-position_lists[3][6] = Tower()
-directions = {'right':[(x,position[1]) for x in range(position[0]+1,8)],
-              'left':[(x,position[1]) for x in range(position[0]-1,-1,-1)],
-              'up':[(position[0],y) for y in range(position[1]+1,8)],
-              'down':[(position[0],y) for y in range(position[1]-1,-1,-1)]}
+# Crear un botón
+boton = tk.Button(ventana, text="Clic aquí")
 
-def cola(direction: str):
-    for x, y in directions[direction]:
-        cell_to_check = position_lists[x][y]
-        if type(cell_to_check) is Empty:
-            print(f"{direction} {x} and {y}")
-        else:
-            break
+# Vincular el evento de clic izquierdo del ratón a la función on_button_click
+boton.bind("<Button-1>", on_button_click)
 
-cola('right')
-cola('left')
-cola('up')
-cola('down')
+# Crear un botón para desvincular el evento
+boton_desvincular = tk.Button(ventana, text="Desvincular evento", command=desvincular_evento)
+
+# Colocar los botones en la ventana
+boton.pack(pady=20)
+boton_desvincular.pack(pady=10)
+
+# Iniciar el bucle principal
+ventana.mainloop()
+

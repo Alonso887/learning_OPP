@@ -9,8 +9,10 @@ class Board():
         self.container = container
         self.canvas = tk.Canvas(self.container,height= 480, width= 480, background= "black", highlightbackground="black")
         self.canvas.place(x= 360, y= 270, anchor= tk.CENTER)
-        self.position_lists = [[],[],[],[],[],[],[],[]]
-        
+        self.position_lists = [[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],
+                               [0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7]]
+        self.color_turn = "white"
+
         #Extramethods
         for i in range(0,8):
             self.canvas.columnconfigure(i, minsize= 54)
@@ -24,7 +26,19 @@ class Board():
     def clear_board(self):
         for i, k in [(i,k) for i in range(8) for k in range(8)]:
             cell_to_clear = self.position_lists[i][k]
-            cell_to_clear.Label.configure(background= 'white')         
+            cell_to_clear.Label.configure(background= 'white')
+
+    def next_turn(self):
+        if self.color_turn == "black":
+            for i, k in [(i,k) for i in range(8) for k in range(8)]:
+                cell_to_check = self.position_lists[i][k]
+                cell_to_check.check_turn()
+                self.color_turn = "white"
+        elif self.color_turn == "white":
+            for i, k in [(i,k) for i in range(8) for k in range(8)]:
+                cell_to_check = self.position_lists[i][k]
+                cell_to_check.check_turn()
+                self.color_turn = "black"
 
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
@@ -33,6 +47,7 @@ class Empty():
         self.board = container
         self.container = container.canvas
         self.piece_image = tk.PhotoImage(file= r'assets\empty.png')
+        self.color = ""
 
     def position_piece(self, row:int, column:int):
         self.Label = tk.Label(self.container, image= self.piece_image, background= "white", width= 48, height= 48)
@@ -40,22 +55,21 @@ class Empty():
         self.Label.grid(row= row, column= column)
         
         self.position = (row,column)
-        if not type(self) is Empty:
-            self.board.position_lists[row][column] = self
+        self.board.position_lists[row][column] = self
     
     def select_piece(self,event):
         pass
 
-    #Clears all the cells in ALL of the boards    
-    @staticmethod
-    def clear_boards_background():
-        for cell in Empty.instances:
-            cell.Label.configure(background= 'white')
+    def check_turn(self):
+        if self.board.color_turn == self.color:
+            self.Label.bind('<Button-1>', self.select_piece)
+        elif self.board.color_turn != self.color:
+            self.Label.unbind('<Button-1>')
 
 class Tower(Empty):
     colors = {'black':r'assets\black_tower.png','white':r'assets\white_tower.png'}
     instances = []
-    def __init__(self, container, color:str):
+    def __init__(self, container: Board, color:str):
         super().__init__(container= container)
         #Value asignation
         self.piece_image = tk.PhotoImage(file= Tower.colors[color])  
@@ -80,7 +94,7 @@ class Tower(Empty):
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
             cell_to_check.Label.configure(background= 'yellow')
-            if not type(cell_to_check).__name__ == 'Empty':
+            if not type(cell_to_check).__name__ == 'Empty': 
                 break
     
 
@@ -95,7 +109,7 @@ class Pawn(Empty):
         Pawn.instances.append(self)
 
     def select_piece(self,event):
-        self.clear_boards_background()
+        self.board.clear_board()
         self.Label.configure(background= 'red')
 
 def main():
@@ -115,6 +129,7 @@ def main():
     a.position_piece(3,6)
     b.position_piece(3,4)
     
+    board.next_turn()
     root.mainloop()
 
 if __name__ == "__main__":
