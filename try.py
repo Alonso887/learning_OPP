@@ -6,7 +6,7 @@ def on_button_click(event):
 def desvincular_evento():
     # Verificar si el evento está vinculado antes de desvincularlo
     if ("<Button-1>", on_button_click) in boton.bind():
-        boton.unbind("<Button-1>", on_button_click)
+        boton.un
         print("Evento desvinculado")
     else:
         print("Evento no vinculado")
@@ -29,4 +29,3 @@ boton_desvincular.pack(pady=10)
 
 # Iniciar el bucle principal
 ventana.mainloop()
-

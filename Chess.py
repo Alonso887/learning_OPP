@@ -11,7 +11,7 @@ class Board():
         self.canvas.place(x= 360, y= 270, anchor= tk.CENTER)
         self.position_lists = [[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],
                                [0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7]]
-        self.color_turn = "black"
+        self.color_turn = "white"
 
         #Extramethods
         for i in range(0,8):
@@ -20,8 +20,7 @@ class Board():
         
         for i, k in [(i,k) for i in range(8) for k in range(8)]:
             empty_cell = Empty(self)
-            empty_cell.position_piece(i, k)
-            self.position_lists[i].append(empty_cell)  
+            empty_cell.position_piece(i, k)  
 
     def clear_board(self):
         for i, k in [(i,k) for i in range(8) for k in range(8)]:
@@ -40,6 +39,7 @@ class Board():
                 cell_to_check.check_turn()
                 self.color_turn = "black"
 
+
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
     instances = []
@@ -48,6 +48,8 @@ class Empty():
         self.container = container.canvas
         self.piece_image = tk.PhotoImage(file= r'assets\empty.png')
         self.color = ""
+
+        self.instances.append(self)
 
     def position_piece(self, row:int, column:int):
         self.Label = tk.Label(self.container, image= self.piece_image, background= "white", width= 48, height= 48)
@@ -66,6 +68,19 @@ class Empty():
         elif self.board.color_turn != self.color:
             self.Label.unbind('<Button-1>')
 
+    def eat_piece(self,piece_eating,new_position,event):
+        original_position  = piece_eating.position
+        new_empty = Empty(self.board)
+        new_empty.position_piece(original_position[0],original_position[1])
+        piece_eating.position_piece(new_position[0],new_position[1])
+
+        for i,k in [(i,k) for i in range(8) for k in range(8)]:
+            cell = self.board.position_lists[i][i]
+            cell.Label.unbind('<Button-1>')
+        self.board.clear_board()
+        self.board.next_turn()
+
+
 class Tower(Empty):
     colors = {'black':r'assets\black_tower.png','white':r'assets\white_tower.png'}
     instances = []
@@ -81,12 +96,12 @@ class Tower(Empty):
     def select_piece(self,event):
         self.board.clear_board()
         self.Label.configure(background= 'red')
-        self.check_movements('right')
-        self.check_movements('left')
-        self.check_movements('up')
-        self.check_movements('down')
+        self.check_movements_tower('right')
+        self.check_movements_tower('left')
+        self.check_movements_tower('up')
+        self.check_movements_tower('down')
     
-    def check_movements(self, direction:str):
+    def check_movements_tower(self, direction:str):
         #YES, i just learned how to use coprehensions, what, You having problems comprehending?
         directions = {'up':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
                       'down':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
@@ -97,10 +112,11 @@ class Tower(Empty):
             if cell_to_check.color == self.color:
                 break 
             cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                      cell_to_check.eat_piece(piece_eating,new_position,event))
             if not type(cell_to_check).__name__ == 'Empty': 
                 break
     
-
 class Pawn(Empty):
     colors = {'black':r'assets\black_pawn.png','white':r'assets\white_pawn.png'}
     instances = []
@@ -115,6 +131,7 @@ class Pawn(Empty):
     def select_piece(self,event):
         self.board.clear_board()
         self.Label.configure(background= 'red')
+
 
 def main():
     root = tk.Tk()
@@ -133,7 +150,6 @@ def main():
     a.position_piece(3,6)
     b.position_piece(3,4)
     
-    board.next_turn()
     root.mainloop()
 
 if __name__ == "__main__":
