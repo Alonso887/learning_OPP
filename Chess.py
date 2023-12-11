@@ -56,12 +56,44 @@ class Empty():
         self.Label.bind('<Button-1>', self.select_piece)
         self.Label.grid(row= row, column= column)
         
+        # Position and directions need to be defined after positioning the piece
         self.position = (row,column)
+        self.directions = {
+            'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
+            'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
+            'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
+            'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))],
+            'N':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
+            'S':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
+            'E':[(self.position[0],column) for column in range(self.position[1]+1,8)],
+            'W':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)],
+            # The Tuple is in a list just because check_movements expects an iterable object
+            # Also, this are the L movements from the horse
+            'L1':[(self.position[0]-2, self.position[1]+1)],
+            'L2':[(self.position[0]-1, self.position[1]+2)],
+            'L3':[(self.position[0]+1, self.position[1]+2)],
+            'L4':[(self.position[0]+2, self.position[1]+1)],
+            'L5':[(self.position[0]+2, self.position[1]-1)],
+            'L6':[(self.position[0]+1, self.position[1]-2)],
+            'L7':[(self.position[0]-1, self.position[1]-2)],
+            'L8':[(self.position[0]-2, self.position[1]-1)]}
+        # YES, i just learned how to use coprehensions, what, You having problems comprehending?
         self.board.position_lists[row][column] = self
     
     def select_piece(self,event):
         pass
 
+    def check_movements(self, direction:str):
+        for row, column in self.directions[direction]:
+            cell_to_check = self.board.position_lists[row][column]
+            if cell_to_check.color is self.color:
+                break 
+            cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                      cell_to_check.eat_piece(piece_eating,new_position,event))
+            if not type(cell_to_check).__name__ == 'Empty':
+                break
+    
     def check_turn(self):
         if self.board.color_turn == self.color:
             self.Label.bind('<Button-1>', self.select_piece)
@@ -97,22 +129,6 @@ class Tower(Empty):
         self.check_movements('S')
         self.check_movements('E')
         self.check_movements('W')
-    
-    def check_movements(self, direction:str):
-        #YES, i just learned how to use coprehensions, what, You having problems comprehending?
-        directions = {'N':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
-                      'S':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
-                      'E':[(self.position[0],column) for column in range(self.position[1]+1,8)],
-                      'W':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
-        for row, column in directions[direction]:
-            cell_to_check = self.board.position_lists[row][column]
-            if cell_to_check.color is self.color:
-                break 
-            cell_to_check.Label.configure(background= 'yellow')
-            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
-                                      cell_to_check.eat_piece(piece_eating,new_position,event))
-            if not type(cell_to_check).__name__ == 'Empty': 
-                break
 
 
 class Bishop(Empty):
@@ -130,21 +146,6 @@ class Bishop(Empty):
         self.check_movements('NW')
         self.check_movements('SE')
         self.check_movements('SW')
-
-    def check_movements(self, direction:str):
-        directions = {'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
-                      'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
-                      'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
-                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))],}
-        for row, column in directions[direction]:
-            cell_to_check = self.board.position_lists[row][column]
-            if cell_to_check.color is self.color:
-                break 
-            cell_to_check.Label.configure(background= 'yellow')
-            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
-                                      cell_to_check.eat_piece(piece_eating,new_position,event))
-            if not type(cell_to_check).__name__ == 'Empty': 
-                break
 
 
 class Queen(Empty):
@@ -167,24 +168,26 @@ class Queen(Empty):
         self.check_movements('E')
         self.check_movements('W')
 
-    def check_movements(self, direction:str):
-        directions = {'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
-                      'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
-                      'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
-                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))],
-                      'N':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
-                      'S':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
-                      'E':[(self.position[0],column) for column in range(self.position[1]+1,8)],
-                      'W':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
-        for row, column in directions[direction]:
-            cell_to_check = self.board.position_lists[row][column]
-            if cell_to_check.color is self.color:
-                break 
-            cell_to_check.Label.configure(background= 'yellow')
-            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
-                                     cell_to_check.eat_piece(piece_eating,new_position,event))
-            if not type(cell_to_check).__name__ == 'Empty': 
-                break
+
+class Horse(Empty):
+    colors = {'black':r'assets\black_horse.png','white':r'assets\white_horse.png'}
+    def __init__(self, container: Board, color:str):
+        super().__init__(container= container)
+        # Value asignation  
+        self.color = color
+        self.piece_image = tk.PhotoImage(file= Horse.colors[color])
+    
+    def select_piece(self, event):
+        self.board.clear_board()
+        self.Label.configure(background= 'red')
+        self.check_movements('L1')
+        self.check_movements('L2')
+        self.check_movements('L3')
+        self.check_movements('L4')
+        self.check_movements('L5')
+        self.check_movements('L6')
+        self.check_movements('L7')
+        self.check_movements('L8')
 
 
 class Pawn(Empty):
@@ -216,9 +219,11 @@ def main():
 
     c = Queen(board, 'black')
     a = Bishop(board, 'white')
+    b = Horse(board, 'black')
 
     c.position_piece(3,5)
     a.position_piece(4,2)
+    b.position_piece(4,3)
     
     root.mainloop()
 
