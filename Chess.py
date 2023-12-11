@@ -93,17 +93,17 @@ class Tower(Empty):
     def select_piece(self,event):
         self.board.clear_board()
         self.Label.configure(background= 'red')
-        self.check_movements('right')
-        self.check_movements('left')
-        self.check_movements('up')
-        self.check_movements('down')
+        self.check_movements('N')
+        self.check_movements('S')
+        self.check_movements('E')
+        self.check_movements('W')
     
     def check_movements(self, direction:str):
         #YES, i just learned how to use coprehensions, what, You having problems comprehending?
-        directions = {'up':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
-                      'down':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
-                      'right':[(self.position[0],column) for column in range(self.position[1]+1,8)],
-                      'left':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
+        directions = {'N':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
+                      'S':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
+                      'E':[(self.position[0],column) for column in range(self.position[1]+1,8)],
+                      'W':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
             if cell_to_check.color is self.color:
@@ -135,7 +135,7 @@ class Bishop(Empty):
         directions = {'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
                       'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
                       'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
-                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))]}
+                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))],}
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
             if cell_to_check.color is self.color:
@@ -145,6 +145,47 @@ class Bishop(Empty):
                                       cell_to_check.eat_piece(piece_eating,new_position,event))
             if not type(cell_to_check).__name__ == 'Empty': 
                 break
+
+
+class Queen(Empty):
+    colors = {'black':r'assets\black_queen.png', 'white':r'assets\white_queen.png'}
+    def __init__(self, container: Board, color:str):
+        super().__init__(container= container)
+        #Value asignation
+        self.color = color
+        self.piece_image = tk.PhotoImage(file= Queen.colors[color])
+
+    def select_piece(self, event):
+        self.board.clear_board()
+        self.Label.configure(background= 'red')
+        self.check_movements('NW')
+        self.check_movements('NE')
+        self.check_movements('SW')
+        self.check_movements('SE')
+        self.check_movements('N')
+        self.check_movements('S')
+        self.check_movements('E')
+        self.check_movements('W')
+
+    def check_movements(self, direction:str):
+        directions = {'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
+                      'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
+                      'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
+                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))],
+                      'N':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
+                      'S':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
+                      'E':[(self.position[0],column) for column in range(self.position[1]+1,8)],
+                      'W':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
+        for row, column in directions[direction]:
+            cell_to_check = self.board.position_lists[row][column]
+            if cell_to_check.color is self.color:
+                break 
+            cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                     cell_to_check.eat_piece(piece_eating,new_position,event))
+            if not type(cell_to_check).__name__ == 'Empty': 
+                break
+
 
 class Pawn(Empty):
     colors = {'black':r'assets\black_pawn.png','white':r'assets\white_pawn.png'}
@@ -173,9 +214,11 @@ def main():
         white_pawn = Pawn(board, 'white')
         white_pawn.position_piece(row= 6, column= i)
 
-    c = Bishop(board, 'black')
+    c = Queen(board, 'black')
+    a = Bishop(board, 'white')
 
     c.position_piece(3,5)
+    a.position_piece(4,2)
     
     root.mainloop()
 
