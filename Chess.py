@@ -83,25 +83,22 @@ class Empty():
 
 class Tower(Empty):
     colors = {'black':r'assets\black_tower.png','white':r'assets\white_tower.png'}
-    instances = []
     def __init__(self, container: Board, color:str):
         super().__init__(container= container)
         #Value asignation
         self.color = color
         self.piece_image = tk.PhotoImage(file= Tower.colors[color])  
-        #Extra methods
-        Tower.instances.append(self)
 
     #Turns the background red and marks the posible moves for the piece
     def select_piece(self,event):
         self.board.clear_board()
         self.Label.configure(background= 'red')
-        self.check_movements_tower('right')
-        self.check_movements_tower('left')
-        self.check_movements_tower('up')
-        self.check_movements_tower('down')
+        self.check_movements('right')
+        self.check_movements('left')
+        self.check_movements('up')
+        self.check_movements('down')
     
-    def check_movements_tower(self, direction:str):
+    def check_movements(self, direction:str):
         #YES, i just learned how to use coprehensions, what, You having problems comprehending?
         directions = {'up':[(row,self.position[1]) for row in range(self.position[0]+1,8)],
                       'down':[(row,self.position[1]) for row in range(self.position[0]-1,-1,-1)],
@@ -109,14 +106,46 @@ class Tower(Empty):
                       'left':[(self.position[0],column) for column in range(self.position[1]-1,-1,-1)]}
         for row, column in directions[direction]:
             cell_to_check = self.board.position_lists[row][column]
-            if cell_to_check.color == self.color:
+            if cell_to_check.color is self.color:
                 break 
             cell_to_check.Label.configure(background= 'yellow')
             cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
                                       cell_to_check.eat_piece(piece_eating,new_position,event))
             if not type(cell_to_check).__name__ == 'Empty': 
                 break
+
+
+class Bishop(Empty):
+    colors = {'black':r'assets\black_bishop.png', 'white':r'assets\white_bishop.png'}
+    def __init__(self, container: Board, color:str):
+        super().__init__(container= container)
+        #Value assignation
+        self.color = color
+        self.piece_image = tk.PhotoImage(file= Bishop.colors[color])
     
+    def select_piece(self,event):
+        self.board.clear_board()
+        self.Label.configure(background= 'red')
+        self.check_movements('NE')
+        self.check_movements('NW')
+        self.check_movements('SE')
+        self.check_movements('SW')
+
+    def check_movements(self, direction:str):
+        directions = {'NW':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]-1,-1,-1))],
+                      'NE':[(row, column) for row, column in zip(range(self.position[0]-1,-1,-1), range(self.position[1]+1,8))],
+                      'SW':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]-1,-1,-1))],
+                      'SE':[(row, column) for row, column in zip(range(self.position[0]+1,8), range(self.position[1]+1,8))]}
+        for row, column in directions[direction]:
+            cell_to_check = self.board.position_lists[row][column]
+            if cell_to_check.color is self.color:
+                break 
+            cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                      cell_to_check.eat_piece(piece_eating,new_position,event))
+            if not type(cell_to_check).__name__ == 'Empty': 
+                break
+
 class Pawn(Empty):
     colors = {'black':r'assets\black_pawn.png','white':r'assets\white_pawn.png'}
     instances = []
@@ -144,11 +173,9 @@ def main():
         white_pawn = Pawn(board, 'white')
         white_pawn.position_piece(row= 6, column= i)
 
-    a = Tower(board,'white')
-    b = Tower(board,'white')
+    c = Bishop(board, 'black')
 
-    a.position_piece(3,6)
-    b.position_piece(3,4)
+    c.position_piece(3,5)
     
     root.mainloop()
 
