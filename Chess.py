@@ -76,7 +76,8 @@ class Empty():
             'L5':[(self.position[0]+2, self.position[1]-1)],
             'L6':[(self.position[0]+1, self.position[1]-2)],
             'L7':[(self.position[0]-1, self.position[1]-2)],
-            'L8':[(self.position[0]-2, self.position[1]-1)]}
+            'L8':[(self.position[0]-2, self.position[1]-1)],
+            }
         # YES, i just learned how to use coprehensions, what, You having problems comprehending?
         self.board.position_lists[row][column] = self
     
@@ -85,7 +86,10 @@ class Empty():
 
     def check_movements(self, direction:str):
         for row, column in self.directions[direction]:
-            cell_to_check = self.board.position_lists[row][column]
+            try:
+                cell_to_check = self.board.position_lists[row][column]
+            except IndexError: # L directions in self.directions can get out of range (Horses, Pawns)
+                continue
             if cell_to_check.color is self.color:
                 break 
             cell_to_check.Label.configure(background= 'yellow')
@@ -204,6 +208,55 @@ class Pawn(Empty):
     def select_piece(self,event):
         self.board.clear_board()
         self.Label.configure(background= 'red')
+        self.check_movements()
+        # Pawns Can only go one direction and that depends on the piece color
+        
+    def check_movements(self):
+        # Each tuple is the position of the posible pawn movements divided in directions by colors 
+        EAT_POSITIONS = {'black':[(self.position[0]+1,self.position[1]-1), (self.position[0]+1,self.position[1]+1)],
+                         'white':[(self.position[0]-1,self.position[1]-1), (self.position[0]-1,self.position[1]+1)]}
+        # This cicle detects if the pawn can or not eat a piece
+        for row, column in EAT_POSITIONS.get(self.color):
+            try:
+                cell_to_check = self.board.position_lists[row][column]
+            except IndexError: # Pawns can try to get values in the border of the board
+                continue
+            if type(cell_to_check) is Empty:
+                continue
+            if cell_to_check.color is self.color:
+                continue 
+            cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                      cell_to_check.eat_piece(piece_eating,new_position,event))
+        # This part checks for the front position
+        MOVE_POSITIONS = {'black':(self.position[0]+1,self.position[1]),
+                          'white':(self.position[0]-1, self.position[1])}
+        row = MOVE_POSITIONS.get(self.color)[0]
+        column = MOVE_POSITIONS.get(self.color)[1]
+        if type(self.board.position_lists[row][column]) is not Empty:
+            pass
+        else:
+            cell_to_check = self.board.position_lists[row][column]
+            cell_to_check.Label.configure(background= 'yellow')
+            cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                    cell_to_check.eat_piece(piece_eating,new_position,event))
+        # This part checks if it's the first turn so the pawn can move 2 cells
+        if self.color == 'black' and self.position[0] == 1:
+            if type(self.board.position_lists[self.position[0]+2][column]) is not Empty:
+                pass
+            else:
+                cell_to_check = self.board.position_lists[self.position[0]+2][column]
+                cell_to_check.Label.configure(background= 'yellow')
+                cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                        cell_to_check.eat_piece(piece_eating,new_position,event))
+        if self.color == 'white' and self.position[0] == 6:
+            if type(self.board.position_lists[self.position[0]-2][column]) is not Empty:
+                pass
+            else:
+                cell_to_check = self.board.position_lists[self.position[0]-2][column]
+                cell_to_check.Label.configure(background= 'yellow')
+                cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
+                                        cell_to_check.eat_piece(piece_eating,new_position,event))
 
 
 def main():
