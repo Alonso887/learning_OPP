@@ -45,7 +45,10 @@ class Empty():
     instances = []
     def __init__(self, container:Board):
         self.board = container
-        self.container = container.canvas
+        try:
+            self.container = container.canvas
+        except:
+            self.container = container
         self.piece_image = tk.PhotoImage(file= r'assets\empty.png')
         self.color = ""
 
@@ -209,8 +212,7 @@ class Pawn(Empty):
         self.board.clear_board()
         self.Label.configure(background= 'red')
         self.check_movements()
-        # Pawns Can only go one direction and that depends on the piece color
-        
+    
     def check_movements(self):
         # Each tuple is the position of the posible pawn movements divided in directions by colors 
         EAT_POSITIONS = {'black':[(self.position[0]+1,self.position[1]-1), (self.position[0]+1,self.position[1]+1)],
@@ -257,7 +259,13 @@ class Pawn(Empty):
                 cell_to_check.Label.configure(background= 'yellow')
                 cell_to_check.Label.bind('<Button-1>', lambda event, piece_eating=self, new_position=cell_to_check.position:
                                         cell_to_check.eat_piece(piece_eating,new_position,event))
-
+        # This part checks for color if the pawn can crown
+        if self.color == 'black' and self.position[0] == 7:
+            new_queen = Queen(self.board, self.color)
+            new_queen.position_piece(self.position[0],self.position[1])
+        if self.color == 'white' and self.position[0] == 0:
+            new_queen = Queen(self.board, self.color)
+            new_queen.position_piece(self.position[0],self.position[1])
 
 def main():
     root = tk.Tk()
