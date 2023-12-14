@@ -1,10 +1,4 @@
-def mi_decorador(func):
-    
-    
+var = False
 
-@mi_decorador
-def mi_funcion():
-    print("Ejecutando la función original")
-
-# Llamando a la función modificada
-mi_funcion()
+if not var:
+    print('A')
