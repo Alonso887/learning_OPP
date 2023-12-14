@@ -28,7 +28,6 @@ class Board():
             cell_to_clear.Label.configure(background= 'white')
 
     def next_turn(self):
-        king_in_menace = False
         if self.color_turn == "black":
             self.color_turn = "white"
         elif self.color_turn == "white":
@@ -38,16 +37,21 @@ class Board():
             cell_to_check.check_turn()
             if cell_to_check.color != self.color_turn:
                 cell_to_check.mark_king_menaces()
-            if type(cell_to_check) is King and cell_to_check.king_menace_cell == False:
-                king_in_menace = True
-        if king_in_menace:
-            for i, k in [(i,k) for i in range(8) for k in range(8)]:
-                cell_to_check = self.position_lists[i][k]
-                if type(cell_to_check) is King:
-                    continue
-                cell_to_check.Label.unbind('<Button-1>')
-        
-    
+
+    def king_menaces(self):
+        found_king = False
+        for i,k in [(i,k) for i in range(8) for k in range(8)]:
+            cell_to_check = self.position_lists[i][k]
+            #Cell has to be king, same color as the one in turn and needs to be menaced
+            if cell_to_check.color == self.color_turn and type(cell_to_check) is King and cell_to_check.king_menace_cell == True:
+                found_king = cell_to_check
+        # Reusing vars :)
+        if found_king != False:
+            for i,k in [(i,k) for i in range(8) for k in range(8)]:
+                cell_to_unbind = self.position_lists[i][k]
+                cell_to_unbind.Label.unbind('<Button-1>')
+            found_king.check_turn()
+            
 #Sets an Empty Label in the board, is the Mother class for all the other pieces
 class Empty():
     instances = []
@@ -99,6 +103,8 @@ class Empty():
 
     def check_movements(self, direction:str):
         for row, column in self.directions[direction]:
+            if row < 0 or column < 0:
+                continue
             try:
                 cell_to_check = self.board.position_lists[row][column]
             except IndexError: # L directions in self.directions can get out of range (Horses, Pawns)
@@ -116,36 +122,33 @@ class Empty():
 
     def check_king_menace(self, direction:str):
         king_protector_validator = []
-        other_pieces = 0
+        found_piece = False
+        # Also, sorry for the horrible 5 indentations
         for row, column in self.directions[direction]:
+            if row < 0 or column < 0:
+                continue
             try:
                 cell_to_check = self.board.position_lists[row][column]
             except IndexError: # L directions in self.directions can get out of range (Horses, Pawns)
                 continue
-            if cell_to_check.color is self.color:
+            if cell_to_check.color == self.color:
                 cell_to_check.king_menace_cell = True
-                cell_to_check.Label.configure(background= 'green')
                 break 
-            # This part modifies the king_protector list for 
             if type(cell_to_check) is Empty:
+                if found_piece:
+                    break
                 cell_to_check.king_menace_cell = True
-                cell_to_check.Label.configure(background= 'green')
-                king_protector_validator.append(cell_to_check)
-                continue
             elif type(cell_to_check) is King:
-                cell_to_check.king_menace_cell = True
+                if len(king_protector_validator) == 1:
+                    piece_protecting = king_protector_validator[0]
+                    piece_protecting.king_protector = True
+                else:
+                    cell_to_check.king_menace_cell = True
+            else:
+                if found_piece:
+                    break
                 king_protector_validator.append(cell_to_check)
-                break
-            elif type(cell_to_check) is not Empty and type(cell_to_check) is not King:
-                king_protector_validator.append(cell_to_check)
-            other_pieces = sum(not isinstance(cell,Empty) for cell in king_protector_validator)
-            king_pieces = sum(isinstance(cell,King) for cell in king_protector_validator)
-            # This part assigns the king protector atribute if needed
-            if other_pieces != 1 and king_pieces != 1:
-                break
-            for cell in king_protector_validator:
-                if type(cell) is not Empty: 
-                    cell.king_protector = True # Sorry for the 5 indentations, i know it hurts
+                found_piece = True
 
     def check_turn(self):
         if self.board.color_turn == self.color:
@@ -166,6 +169,7 @@ class Empty():
             cell.king_protector = False
         self.board.clear_board()
         self.board.next_turn()
+        self.board.king_menaces()
 
 
 class Tower(Empty):
@@ -353,9 +357,10 @@ class Pawn(Empty):
 
     def mark_king_menaces(self):
         king_protector_validator = []
-        other_pieces = 0
+        found_piece = False
         EAT_POSITIONS = {'black':[(self.position[0]+1,self.position[1]-1), (self.position[0]+1,self.position[1]+1)],
                          'white':[(self.position[0]-1,self.position[1]-1), (self.position[0]-1,self.position[1]+1)]}
+        # Also, sorry for the horrible 5 indentations
         for row, column in EAT_POSITIONS[self.color]:
             try:
                 cell_to_check = self.board.position_lists[row][column]
@@ -363,24 +368,22 @@ class Pawn(Empty):
                 continue
             if cell_to_check.color == self.color:
                 cell_to_check.king_menace_cell = True
-                cell_to_check.Label.configure(background= 'green')
                 break 
-            # This part modifies the king_protector list for validation
             if type(cell_to_check) is Empty:
+                if found_piece:
+                    break
                 cell_to_check.king_menace_cell = True
-                king_protector_validator.append(cell_to_check)
-                cell_to_check.Label.configure(background= 'green')
-                continue
-            elif type(cell_to_check) is not Empty and type(cell_to_check) is not King:
-                king_protector_validator.append(cell_to_check)
+            elif type(cell_to_check) is King:
+                if len(king_protector_validator) == 1:
+                    piece_protecting = king_protector_validator[0]
+                    piece_protecting.king_protector = True
+                else:
+                    cell_to_check.king_menace_cell = True
             else:
-                other_pieces = sum(not isinstance(cell,Empty) for cell in king_protector_validator)
-            # This part assigns the king protector atribute if needed
-            if other_pieces != 1:
-                break
-            for cell in king_protector_validator:
-                if type(cell) is not Empty: 
-                    cell.king_protector = True # Sorry for the 5 indentations, i know it hurts
+                if found_piece:
+                    break
+                king_protector_validator.append(cell_to_check)
+                found_piece = True
 
 
 class King(Empty):
@@ -390,6 +393,7 @@ class King(Empty):
         #Value asignation
         self.color = color
         self.piece_image = tk.PhotoImage(file= King.colors[color])
+        self.king_menace_cell = False
     
     def select_piece(self,event):
         self.board.clear_board()
@@ -402,6 +406,8 @@ class King(Empty):
                           (self.position[0]+1,self.position[1]), (self.position[0]+1,self.position[1]-1),
                           (self.position[0],self.position[1]-1), (self.position[0]-1,self.position[1]-1)]
         for row, column in KING_MOVEMENTS:
+            if row < 0 or column < 0:
+                continue
             try:
                 cell_to_check = self.board.position_lists[row][column]
             except IndexError: # The king can also get out of index
@@ -416,34 +422,37 @@ class King(Empty):
             
     def mark_king_menaces(self):
         king_protector_validator = []
-        other_pieces = 0
+        found_piece = False
         KING_MOVEMENTS = [(self.position[0]-1,self.position[1]), (self.position[0]-1,self.position[1]+1),
                           (self.position[0],self.position[1]+1), (self.position[0]+1,self.position[1]+1),
                           (self.position[0]+1,self.position[1]), (self.position[0]+1,self.position[1]-1),
                           (self.position[0],self.position[1]-1), (self.position[0]-1,self.position[1]-1)]
+        # Also, sorry for the horrible 5 indentations
         for row, column in KING_MOVEMENTS:
+            if row < 0 or column < 0:
+                continue
             try:
                 cell_to_check = self.board.position_lists[row][column]
             except IndexError: # L directions in self.directions can get out of range (Horses, Pawns)
                 continue
-            if cell_to_check.color is self.color:
+            if cell_to_check.color == self.color:
                 cell_to_check.king_menace_cell = True
                 break 
-            # This part modifies the king_protector list for 
             if type(cell_to_check) is Empty:
+                if found_piece:
+                    break
                 cell_to_check.king_menace_cell = True
-                king_protector_validator.append(cell_to_check)
-            elif type(cell_to_check) is not Empty and type(cell_to_check) is not King:
-                king_protector_validator.append(cell_to_check)
+            elif type(cell_to_check) is King:
+                if len(king_protector_validator) == 1:
+                    piece_protecting = king_protector_validator[0]
+                    piece_protecting.king_protector = True
+                else:
+                    cell_to_check.king_menace_cell = True
             else:
-                other_pieces = sum(not isinstance(cell,Empty) for cell in king_protector_validator)
-            # This part assigns the king protector atribute if needed
-            if other_pieces != 1:
-                break
-            for cell in king_protector_validator:
-                if type(cell) is not Empty: 
-                    cell.king_protector = True # Sorry for the 5 indentations, i know it hurts
-
+                if found_piece:
+                    break
+                king_protector_validator.append(cell_to_check)
+                found_piece = True
             
 
 def main():
@@ -451,20 +460,44 @@ def main():
     root.geometry("720x540")
     root.resizable(False,False)
     board = Board(root)
-    for i in range(0,6):
-        black_pawn = Tower(board, 'black')
-        black_pawn.position_piece(row= 1, column= i)
-        white_pawn = Pawn(board, 'white')
-        white_pawn.position_piece(row= 6, column= i)
+    for i in range(8):
+        piece = Pawn(board,'black')
+        piece.position_piece(1,i)
+        piece = Pawn(board,'white')
+        piece.position_piece(6,i)
+    tower = Tower(board,'black')
+    tower.position_piece(0,0)
+    tower = Tower(board,'black')
+    tower.position_piece(0,7)
+    tower = Tower(board,'white')
+    tower.position_piece(7,7)
+    tower = Tower(board,'white')
+    tower.position_piece(7,0)
+    bishop = Bishop(board,'black')
+    bishop.position_piece(0,2)
+    bishop = Bishop(board,'black')
+    bishop.position_piece(0,5)
+    bishop = Bishop(board,'white')
+    bishop.position_piece(7,2)
+    bishop = Bishop(board,'white')
+    bishop.position_piece(7,5)
+    horse = Horse(board,'black')
+    horse.position_piece(0,1)
+    horse = Horse(board,'black')
+    horse.position_piece(0,6)
+    horse = Horse(board,'white')
+    horse.position_piece(7,1)
+    horse = Horse(board,'white')
+    horse.position_piece(7,6)
+    queen = Queen(board,"black")
+    queen.position_piece(0,3)
+    queen = Queen(board,"white")
+    queen.position_piece(7,3)
+    king = King(board, 'black')
+    king.position_piece(0,4) 
+    king = King(board, 'white')
+    king.position_piece(7,4)
 
-    c = Queen(board, 'black')
-    a = Bishop(board, 'white')
-    b = King(board, 'black')
-
-    c.position_piece(3,5)
-    a.position_piece(4,2)
-    b.position_piece(4,3)
-    
     root.mainloop()
 
 if __name__ == "__main__":
