@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-
+"""
+Chess.py
+Made by Alonso Adrian
+LaEntropia was here :)
+"""
 #Sets a Canvas with the needed proportions, i think it's unnecesarie to use a class for this
 # But i'm doing it to learn i guess 
 class Board():
@@ -12,6 +16,8 @@ class Board():
         self.position_lists = [[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],
                                [0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7],[0,1,2,3,4,5,6,7]]
         self.color_turn = "white"
+        self.Label = tk.Label(self.container, text= "Made by LaEntropia", background= "green", font= ('Bahnschrift SemiLight SemiConde',14))
+        self.Label.place(x= 0, y= 0)
 
         #Extramethods
         for i in range(0,8):
