@@ -3,7 +3,7 @@ import os
 import datetime
 import base64
 import tkinter as tk
-from tkinter import ttk, font
+from tkinter import ttk
 from pymongo import MongoClient
 from PIL import Image
 
@@ -11,8 +11,8 @@ texto = "claro AAAAAAAAAAAAAAA, un chingo de texto pa ver que pedo con todo esto
 titulo = "Titulo largoooooooooooote"
 
 class Posts(ttk.Frame):# id is just for avoiding problems
-    def __init__(self, container:ttk.Frame, _id, title:str, body:str, date:datetime.datetime, name="Anonymous",image=None):
-        super().__init__(container, borderwidth= 1, relief="solid", width=396)
+    def __init__(self, master, _id, title:str, body:str, date:datetime.datetime, name="Anonymous",image=None):
+        super().__init__(master=master, borderwidth= 1, relief="solid", width=396)
         self.title = title
         self.body = body
         self.date = date
@@ -38,27 +38,29 @@ class Posts(ttk.Frame):# id is just for avoiding problems
             self.image = tk.PhotoImage(f"assets/{self.author}-{self.date}.png")
     
     def decorate_post(self):
-        self.title_Label = tk.Label(self, text=titulo, font=("Bahnschrift",11), relief="solid")
+        self.columnconfigure(0, weight=2)
+        self.title_Label = tk.Label(self, text=self.title, font=("Bahnschrift",11), wraplength=300, justify=tk.LEFT)
         self.title_Label.grid(column=0, row=0, sticky=tk.NW)
-        self.info_Label = tk.Label(self, text=f"{self.author}-{self.date}", font=("Bahnschrift",11), relief="solid")
+        self.info_Label = tk.Label(self, text=f"{self.author} {self.date}", font=("Bahnschrift",11), wraplength= 80, justify=tk.RIGHT)
         self.info_Label.grid(column=1, row=0, sticky=tk.NE)
         if self.image is None:
-            self.body_Label = tk.Label(self, text=texto, font=("Montserrat",9), wraplength=392, relief="solid", justify=tk.LEFT)
-            self.body_Label.grid(column=0, row=1, columnspan=2)
+            self.body_Label = tk.Label(self, text=self.body, font=("Montserrat",9), wraplength=392, justify=tk.LEFT)
+            self.body_Label.grid(column=0, row=1, columnspan=2, sticky=tk.W)
         else:
-            self.body_Label = tk.Label(self, text=self.body, font=("Montserrat",9), wraplength=392, image=self.image, relief="solid")
-            self.body_Label.pack()
+            self.body_Label = tk.Label(self, text=self.body, font=("Montserrat",9), wraplength=392, image=self.image, compound=tk.BOTTOM)
+            self.body_Label.grid(column=0, row=1, columnspan=2, sticky=tk.W)
     
     def pack_post(self):
         self.pack(side=tk.TOP, fill=tk.X, anchor=tk.NW)
+
 
 class Twikker(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
     # Window Configuration
         self.actual_page = 1
-        self.geometry("396x704")
-        self.resizable(False,False)
+        self.geometry("416x704")
+        # self.resizable(False,False)
     # Creates the top part of the Twikker window
         self.menu = ttk.Frame(self, height= 105, borderwidth=2, relief="solid")
         self.menu.pack_propagate(False)
@@ -70,28 +72,36 @@ class Twikker(tk.Tk):
         self.post_sender.pack_propagate(False)
         self.post_sender.pack(anchor=tk.NW, side=tk.BOTTOM, fill=tk.X)
     # Creates the Frame where the posts will be shown
-        self.post_board = tk.Canvas(self, background="green")
-        self.post_board.pack(side=tk.LEFT, fill=tk.BOTH, expand= True)
+        self.post_board = tk.Canvas(self, background="green", width=392)
+        self.post_board.pack(side=tk.TOP, fill=tk.Y, expand=True)
         # self.post_board = ttk.Frame(self, width=396, height=422, borderwidth=2, relief="solid")
         # self.post_board.pack_propagate(False)
         # self.post_board.pack(anchor=tk.NW)   
 
     def refresh_post_board(self):
+    # We clean the canvas by creating a new one
         self.post_board.destroy()
-        self.post_board = tk.Canvas(self, background="green")
-        self.post_board.pack(side=tk.LEFT, fill=tk.BOTH, expand= True)
-    # We get the data from the db, go take it if you want, nothing important there
+        self.post_board = tk.Canvas(self, background="green", width=392, scrollregion=(0,0,1000,1000))
+        self.post_board.pack(side=tk.LEFT, fill=tk.Y, expand=True, anchor=tk.NW)
+        self.scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.post_board.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y, anchor=tk.NE)
+        self.post_board.configure(yscrollcommand=self.scrollbar.set)
+    # Then draw a frame in the canvas with the posts
+        self.post_frame = ttk.Frame(self.post_board, width=396)
+        self.post_board.create_window((0,0), window=self.post_frame, anchor=tk.NW, width=396)
         cluster = MongoClient("mongodb+srv://LaEntropia:GwsItEDiNC7Jmaq3@twikker.xkiwhwx.mongodb.net/?retryWrites=true&w=majority")
         db = cluster["Twikker"]
         collection = db["Posts"]
         pages = []
         for document in collection.find():
-            pages.append(Posts(self.post_board,**document))
+            pages.append(Posts(self.post_frame,**document))
         pages.reverse()
         self.pages = [pages[i:i + 12] for i in range(0, len(pages), 12)]
         for post in self.pages[self.actual_page-1]:
-            post.pack_post()
+            post.pack(side=tk.TOP, expand=True, fill=tk.X)
             post.decorate_post()
+
+
 
 
 def main():
