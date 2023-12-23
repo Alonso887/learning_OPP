@@ -97,7 +97,7 @@ class Twikker(tk.Tk):
             self.scrollbar.destroy()
         except AttributeError: #first time the scrollbar is not created
             pass
-        self.post_board = tk.Canvas(self, background="green", width=392, scrollregion=(0,0,1000,1000))
+        self.post_board = tk.Canvas(self, background="green", width=392, scrollregion=(0,0,6000,6000))
         self.post_board.pack(side=tk.LEFT, fill=tk.Y, expand=True, anchor=tk.NW)
         self.scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.post_board.yview)
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y, anchor=tk.NE)
